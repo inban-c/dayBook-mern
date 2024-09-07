@@ -1,0 +1,35 @@
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+  color: #fff;
+  text-align: center;
+}
+
+h1 {
+  font-size: 3rem;
+  margin-bottom: 2rem;
+}
+
+.button-container {
+  display: flex;
+  gap: 1rem;
+}
+
+.button {
+  padding: 0.75rem 2rem;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 25px;
+  background-color: #ff6b6b;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #e74c3c;
+}
