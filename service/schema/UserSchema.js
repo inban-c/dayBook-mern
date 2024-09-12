@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
   email: String,
   password: String,
   activities: [{
+    _id: mongoose.Schema.Types.ObjectId,  // Unique ID for each activity
     activity: String,
     date: {
       type: Date,
@@ -16,6 +17,7 @@ const userSchema = new mongoose.Schema({
     }
   }]
 });
+
 
 const User = mongoose.model("User", userSchema);
 

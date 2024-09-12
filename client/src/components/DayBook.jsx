@@ -1,33 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from 'axios';
 import './DayBook.css';
+import { useUser } from "../App"; // Import the useUser hook
 
-function DayBook({ user }) {
+function  DayBook() {
   const [activities, setActivities] = useState([]);
   const [activity, setActivity] = useState("");
   const [editIndex, setEditIndex] = useState(null);
-
-  // Fetch activities from backend
-  useEffect(() => {
-    if (user) {
-      const fetchActivities = async () => {
-        try {
-          const response = await axios.get('http://localhost:3000/get-activities', {
-            params: { email: user.email }
-          });
-          setActivities(response.data.activities);
-        } catch (error) {
-          console.error("Error fetching activities", error);
-        }
-      };
-      fetchActivities();
-    }
-  }, [user]);
-
-  // Add or update activity
+  const [addButtonClicked, setAddButtonClicked] = useState(false)
+  const { user } = useUser(); // Access user from context
+  useEffect(()=>{
+    setActivities(user.user.activities)
+  },[])
   const handleAdd = async () => {
-    if (activity.trim() === "") return;
-    
+    setAddButtonClicked(true);
+    if (activity.trim() === "") return
+    // alert(activity)
     if (editIndex !== null) {
       const updatedActivities = activities.map((item, index) =>
         index === editIndex ? { activity } : item
@@ -37,9 +25,11 @@ function DayBook({ user }) {
     } else {
       try {
         const response = await axios.post('http://localhost:3000/add-activity', {
-          email: user.email,
+          email: user.user.email,
           activity
         });
+
+        // alert(JSON.stringify(response.data.activities))
         setActivities(response.data.activities);
       } catch (error) {
         console.error("Error adding activity", error);
@@ -49,14 +39,13 @@ function DayBook({ user }) {
     setActivity("");
   };
 
-  // Delete activity
   const handleDelete = async (index, activityId) => {
     try {
       const response = await axios.post('http://localhost:3000/delete-activity', {
-        email: user.email,
-        activityId
+        email: user.user.email,
+        date:activityId
       });
-      setActivities(response.data.activities); // Update local activities after deletion
+      setActivities(response.data.activities);
     } catch (error) {
       console.error("Error deleting activity", error);
     }
@@ -69,17 +58,22 @@ function DayBook({ user }) {
 
   return (
     <div className="daybook-container">
-      <h2>Welcome, {user ? user.firstName : "Guest"}</h2>
+      {/* {JSON.stringify(user)} */}
+      <h2>Welcome, {user ? user.user.firstName : "Guest"}</h2>
+      <div>
+        {addButtonClicked && <div>{activity}</div>}
+      </div>
       <h3>Your Activity History:</h3>
       <ul className="activity-list">
         {activities.length > 0 ? (
           activities.map((item, index) => (
             <li key={item._id} className="activity-item">
               <span>{item.activity}</span>
+              {/* {item.date} */}
               <button onClick={() => handleEdit(index)} className="edit-button">
                 Edit
               </button>
-              <button onClick={() => handleDelete(index, item._id)} className="delete-button">
+              <button onClick={() => handleDelete(index, item.date)} className="delete-button">
                 Delete
               </button>
             </li>

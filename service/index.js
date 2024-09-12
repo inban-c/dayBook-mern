@@ -4,12 +4,15 @@ const dotenv = require("dotenv").config();
 const User = require("./schema/UserSchema")
 const cors = require('cors');
 
+const connectDB = require("./db/db")
+connectDB();
 app.use(cors());   
 
 app.use(express.json());
 
 
 app.post('/login', async (req, res) => {
+  console.log(req.body)
     const { email, password } = req.body;
     try {
         const user = await User.findOne({
@@ -24,6 +27,7 @@ app.post('/login', async (req, res) => {
         res.status(200).json({
             user: {
                 firstName: user.firstName,
+                email:user.email,
                 activities: user.activities // Assuming you have an 'activities' field
             }
         });
@@ -34,20 +38,24 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/add-activity', async (req, res) => {
-    const { email, activity } = req.body;
-    try {
-      const user = await User.findOne({ email });
-      if (user) {
-        user.activities.push({ activity });
-        await user.save();
-        res.status(200).json({ message: 'Activity added successfully', activities: user.activities });
-      } else {
-        res.status(404).json({ message: 'User not found' });
-      }
-    } catch (error) {
-      res.status(500).json({ message: 'Server error', error });
+  console.log(req.body)
+  const { email, activity } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (user) {
+      user.activities.push({ activity });
+      await user.save();  // Save the user with the new activity
+      console.log("Updated activities:", user.activities);  // <-- Log activities
+      res.status(200).json({ activities: user.activities });  // Return updated activities
+    } else {
+      res.status(404).json({ message: 'User not found' });
     }
-  });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+});
+
+
   
   app.get('/get-activities', async (req, res) => {
     const { email } = req.query;
@@ -64,12 +72,14 @@ app.post('/add-activity', async (req, res) => {
   });
   
   app.post('/delete-activity', async (req, res) => {
-    const { email, activityId } = req.body;
+    const { email, date } = req.body;
+    console.log(req.body)
     try {
       const user = await User.findOne({ email });
       if (user) {
-        user.activities = user.activities.filter(activity => activity._id.toString() !== activityId);
+        user.activities = user.activities.filter(activity => new Date(activity.date).toISOString() !== new Date(date).toISOString());
         await user.save();
+        console.log(user);
         res.status(200).json({ message: 'Activity deleted successfully', activities: user.activities });
       } else {
         res.status(404).json({ message: 'User not found' });
@@ -101,9 +111,9 @@ app.post('/signup', async (req, res) => {
 
 app.get("/",async(req,res)=>{
     
-    const users = await User.find();
-    console.log(users)
-    res.send(users);
+    // const users = await User.find();
+    // console.log(users)
+    res.send("hello user");
 });
 
 
